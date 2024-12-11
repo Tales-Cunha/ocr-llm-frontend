@@ -1,15 +1,16 @@
+// app/context/AuthContext.tsx
 'use client';
 
 import { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import api from '@/utils/axios';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 interface User {
   id: string;
   name: string;
   email: string;
-  // Adicione outros campos conforme necessário
 }
 
 interface AuthContextProps {
@@ -43,7 +44,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setToken(storedToken);
       } catch (error) {
         console.error('Erro ao decodificar o token:', error);
-        // Opcional: Limpar token inválido
         localStorage.removeItem('token');
         setToken(null);
         setUser(null);
@@ -62,29 +62,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = useCallback(async (email: string, password: string) => {
     try {
       const response = await api.post('/auth/login', { email, password });
-      setAuthToken(response.data.token);
+      const { token } = response.data;
+      console.log('Received Token:', token); // Log para verificar o token recebido
+      setAuthToken(token);
       router.push('/upload');
     } catch (error) {
-      throw error;
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.message || 'Erro ao fazer login.';
+        console.error('Erro ao fazer login:', message);
+        throw new Error(message); // Re-throw a mensagem específica
+      } else {
+        console.error('Erro ao fazer login:', error);
+        throw new Error('Erro inesperado ao fazer login.');
+      }
     }
-  }, [router]);
+  }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
     try {
-      const response = await api.post('/auth/register', { name, email, password });
-      setAuthToken(response.data.token);
-      router.push('/upload');
+      await api.post('/auth/register', { name, email, password });
+      await login(email, password);
     } catch (error) {
-      throw error;
+      if (axios.isAxiosError(error) && error.response?.status === 409) {
+        console.error('Erro ao registrar: Email já está em uso.');
+        throw new Error('Email já está em uso.');
+      } else {
+        console.error('Erro ao registrar:', error);
+        throw new Error('Erro ao registrar. Tente novamente.');
+      }
     }
-  }, [router]);
+  }, [login]);
 
-  const logout = useCallback(() => {
+  const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
     router.push('/login');
-  }, [router]);
+  };
 
   return (
     <AuthContext.Provider value={{ user, token, login, register, logout }}>
