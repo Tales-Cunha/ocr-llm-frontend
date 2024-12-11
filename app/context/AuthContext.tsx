@@ -29,10 +29,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
-      setToken(storedToken);
-      const decoded: any = jwtDecode(storedToken);
-      setUser(decoded);
-      api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      try {
+        const decoded: any = jwtDecode(storedToken);
+        setUser(decoded);
+        api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+        setToken(storedToken);
+      } catch (error) {
+        console.error('Erro ao decodificar o token:', error);
+        // Opcional: Limpar token inválido
+        localStorage.removeItem('token');
+        setToken(null);
+        setUser(null);
+      }
     }
   }, []);
 
