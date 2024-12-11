@@ -55,7 +55,7 @@ O aplicativo estará disponível em http://localhost:3000.
 * Acesse a URL do site live: https://ocr-llm-frontend.onrender.com
 * Faça login com suas credenciais. Se você não tiver uma conta, registre-se clicando no link "Registre-se". Pode usar as seguintes credenciais para teste:
 ```
-email: admin
+email: admin@gmail.com
 senha: admin123
 ```
 

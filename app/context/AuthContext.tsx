@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       const { token } = response.data;
-      console.log('Received Token:', token); // Log para verificar o token recebido
+      
       setAuthToken(token);
       router.push('/upload');
     } catch (error) {
