@@ -7,6 +7,7 @@ import { AuthContext } from '../../context/AuthContext';
 import api from '@/utils/axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 interface Message {
   question: string;
@@ -54,8 +55,12 @@ const DocumentInteractPage = () => {
     try {
       const response = await api.get(`/documents/${documentId}`);
       setCustomDocument(response.data);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao carregar documento');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.message || 'Erro ao carregar documento');
+      } else {
+        toast.error('Erro desconhecido ao carregar documento');
+      }
     }
   };
 
@@ -69,8 +74,12 @@ const DocumentInteractPage = () => {
       const { question, answer } = response.data;
       setMessages((prevMessages) => [...prevMessages, { question, answer }]);
       setQuery('');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao obter resposta');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.message || 'Erro ao obter resposta');
+      } else {
+        toast.error('Erro desconhecido ao obter resposta');
+      }
     } finally {
       setLoading(false);
     }
@@ -82,23 +91,27 @@ const DocumentInteractPage = () => {
     setDownloadLoading(true);
 
     try {
-      const response = await api.get(`/documents/${documentId}/download`, {
+      const response = await api.get(`/documents/${documentId}/download-full`, {
         responseType: 'blob',
       });
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/plain' }));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', customDocument.filename);
+      link.setAttribute('download', `${customDocument.filename}.txt`);
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
-      toast.success('Download do PDF iniciado!');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao baixar PDF');
+      toast.success('Download do TXT iniciado!');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.message || 'Erro ao baixar TXT');
+      } else {
+        toast.error('Erro desconhecido ao baixar TXT');
+      }
     } finally {
       setDownloadLoading(false);
     }
-  }, [documentId, document]);
+  }, [documentId, customDocument]);
 
   return (
     <>

@@ -7,6 +7,7 @@ import api from '@/utils/axios';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 interface Document {
   id: string;
@@ -36,8 +37,12 @@ const DocumentsPage = () => {
     try {
       const response = await api.get('/documents');
       setDocuments(response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Erro ao buscar documentos');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Erro ao buscar documentos');
+      } else {
+        setError('Erro desconhecido ao buscar documentos');
+      }
     } finally {
       setLoading(false);
     }
@@ -56,8 +61,12 @@ const DocumentsPage = () => {
       link.click();
       link.parentNode?.removeChild(link);
       toast.success('Download do documento completo iniciado!');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao baixar documento completo');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.message || 'Erro ao baixar documento completo');
+      } else {
+        toast.error('Erro desconhecido ao baixar documento completo');
+      }
     }
   };
 

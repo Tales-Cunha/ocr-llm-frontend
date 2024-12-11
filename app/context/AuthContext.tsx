@@ -5,8 +5,15 @@ import api from '@/utils/axios';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'next/navigation';
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  // Adicione outros campos conforme necessário
+}
+
 interface AuthContextProps {
-  user: any;
+  user: User | null;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
@@ -22,7 +29,7 @@ export const AuthContext = createContext<AuthContextProps>({
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
@@ -30,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       try {
-        const decoded: any = jwtDecode(storedToken);
+        const decoded: User = jwtDecode(storedToken);
         setUser(decoded);
         api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
         setToken(storedToken);
@@ -47,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const setAuthToken = (token: string) => {
     localStorage.setItem('token', token);
     setToken(token);
-    const decoded: any = jwtDecode(token);
+    const decoded: User = jwtDecode(token);
     setUser(decoded);
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   };
@@ -60,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       throw error;
     }
-  }, []);
+  }, [router]);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
     try {
@@ -70,15 +77,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       throw error;
     }
-  }, []);
+  }, [router]);
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
-    delete api.defaults.headers.common['Authorization'];
     router.push('/login');
-  }, []);
+  }, [router]);
 
   return (
     <AuthContext.Provider value={{ user, token, login, register, logout }}>

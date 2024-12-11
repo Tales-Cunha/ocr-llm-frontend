@@ -18,8 +18,12 @@ const LoginPage = () => {
     setError(null);
     try {
       await login(email, password);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Erro ao fazer login');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || 'Erro ao fazer login');
+      } else {
+        setError('Erro desconhecido ao fazer login');
+      }
     } finally {
       setLoading(false);
     }

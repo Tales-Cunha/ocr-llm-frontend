@@ -10,6 +10,7 @@ import FileInput from '@/components/FileInput';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaCheckCircle } from 'react-icons/fa'; // Importação do ícone de checkmark
+import axios from 'axios';
 
 const MESSAGES = {
   uploadSuccess: 'Documento uploadado com sucesso!',
@@ -69,7 +70,7 @@ const UploadPage = () => {
       setProgress(0);
       setUploadCompleted(false); // Resetar indicador de upload concluído
     },
-    []
+    [MAX_FILE_SIZE, allowedTypes]
   );
 
   // Função para verificar o status do documento
@@ -86,8 +87,12 @@ const UploadPage = () => {
         setMessage(MESSAGES.uploadPending);
         setUploadCompleted(false);
       }
-    } catch (err: any) {
-      setError(MESSAGES.fetchStatusError);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(MESSAGES.fetchStatusError);
+      } else {
+        setError('Erro desconhecido ao verificar o status do documento');
+      }
     } finally {
       setVerifyingStatus(false);
     }
@@ -128,8 +133,12 @@ const UploadPage = () => {
         // Verificar o status do documento
         await verifyDocumentStatus(response.data.id);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || MESSAGES.uploadError);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || MESSAGES.uploadError);
+      } else {
+        setError('Erro desconhecido ao fazer upload do documento');
+      }
     } finally {
       setUploading(false);
       setProgress(0);
