@@ -1,7 +1,7 @@
 // app/documents/interact/page.tsx
 'use client';
 
-import { useState, useContext, useEffect, useCallback } from 'react';
+import { useState, useContext, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthContext } from '../../context/AuthContext';
 import api from '@/utils/axios';
@@ -91,7 +91,7 @@ const DocumentInteractPage = () => {
     setDownloadLoading(true);
 
     try {
-      const response = await api.get(`/documents/${documentId}/download-full`, {
+      const response = await api.get(`/documents/${documentId}/download`, {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([response.data], { type: 'text/plain' }));
@@ -187,4 +187,10 @@ const DocumentInteractPage = () => {
   );
 };
 
-export default DocumentInteractPage;
+const DocumentInteractPageWrapper = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <DocumentInteractPage />
+  </Suspense>
+);
+
+export default DocumentInteractPageWrapper;

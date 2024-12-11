@@ -1,7 +1,7 @@
 // app/upload/page.tsx
 'use client';
 
-import { useState, useContext, useEffect, useCallback } from 'react';
+import { useState, useContext, useEffect, useCallback, useMemo } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '@/utils/axios';
 import { useRouter } from 'next/navigation';
@@ -37,8 +37,8 @@ const UploadPage = () => {
   const [uploadCompleted, setUploadCompleted] = useState(false); // Novo estado para indicar upload concluído
 
   // Limitações
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-  const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+  const MAX_FILE_SIZE = useMemo(() => 5 * 1024 * 1024, []); // 5MB
+  const allowedTypes = useMemo(() => ['image/jpeg', 'image/png', 'application/pdf'], []);
 
   useEffect(() => {
     if (!user) {
