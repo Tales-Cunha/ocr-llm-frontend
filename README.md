@@ -53,7 +53,11 @@ O aplicativo estará disponível em http://localhost:3000.
 1. Navegar para a Página de Login:
 
 * Acesse a URL do site live: https://ocr-llm-frontend.onrender.com
-* Faça login com suas credenciais. Se você não tiver uma conta, registre-se clicando no link "Registre-se".
+* Faça login com suas credenciais. Se você não tiver uma conta, registre-se clicando no link "Registre-se". Pode usar as seguintes credenciais para teste:
+```
+email: admin
+senha: admin123
+```
 
 2. Fazendo Upload de Documentos:
 
